@@ -1,8 +1,8 @@
-open Com
+open Ast
 
 let ctx = Map.empty
 
-let infer x = Hm.infer_exp x ctx
+let infer x = Infer.infer_exp x ctx
 
 let pipeline lexbuf =
   try

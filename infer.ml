@@ -1,4 +1,4 @@
-open Com
+open Ast
 
 type scheme = Scheme of string list * typ
 

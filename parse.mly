@@ -1,5 +1,5 @@
 %{
-open Com
+open Ast
 
 let rec fun_apply exp = function
   | [exp'] -> App (exp, exp')
@@ -16,7 +16,7 @@ let rec fun_apply exp = function
 %token ARROW LPAREN RPAREN EQ
 %token EOF
 
-%start <Com.exp> main
+%start <Ast.exp> main
 %%
 
 main:

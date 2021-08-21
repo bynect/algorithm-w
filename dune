@@ -1,0 +1,8 @@
+(executable
+ (name main))
+
+(ocamllex
+ (modules lex))
+
+(menhir
+ (modules parse))

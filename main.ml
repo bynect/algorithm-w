@@ -7,6 +7,14 @@ let ctx : ctx =
       ( "const",
         Scheme ([ "'a"; "'b" ], Fun (Var "'a", Fun (Var "'b", Var "'a"))) );
       ("eq", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
+      ( "pair",
+        Scheme
+          ( [ "'a"; "'b" ],
+            Fun (Var "'a", Fun (Var "'b", Tup [ Var "'a"; Var "'b" ])) ) );
+      ( "fst",
+        Scheme ([ "'a"; "'b" ], Fun (Tup [ Var "'a"; Var "'b" ], Var "'a")) );
+      ( "snd",
+        Scheme ([ "'a"; "'b" ], Fun (Tup [ Var "'a"; Var "'b" ], Var "'b")) );
     ]
   in
   let f acc (v, scheme) = Map.add v scheme acc in

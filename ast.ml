@@ -43,18 +43,35 @@ let string_of_typ ty =
 type scheme = Scheme of string list * typ
 
 let string_of_scheme = function
-  | Scheme (vars, typ) ->
-      if List.length vars != 0 then (
-        let buf = Buffer.create 50 in
-        Buffer.add_string buf "forall";
-        List.iter
-          (fun v ->
-            Buffer.add_char buf ' ';
-            Buffer.add_string buf v)
-          vars;
-        Buffer.add_string buf ". ";
-        (Buffer.to_bytes buf |> Bytes.to_string) ^ string_of_typ typ)
-      else string_of_typ typ
+  | Scheme ([], ty) -> string_of_typ ty
+  | Scheme (vars, ty) ->
+      let rec rename ty (v1, v2) =
+        match ty with
+        | Var v -> Var (if v = v1 then v2 else v)
+        | Bool | Int -> ty
+        | Fun (p, r) -> Fun (rename p (v1, v2), rename r (v1, v2))
+      in
+      let scheme_var i =
+        let off, count = (i mod 26, i / 26) in
+        let buf = Buffer.create 5 in
+        Buffer.add_char buf '\'';
+        let chr = Char.code 'a' + off |> Char.chr in
+        for _ = 0 to count do
+          Buffer.add_char buf chr
+        done;
+        Buffer.to_bytes buf |> Bytes.to_string
+      in
+      let vars' = List.mapi (fun i v -> (v, scheme_var i)) vars in
+      let ty' = List.fold_left rename ty vars' in
+      let buf = Buffer.create 50 in
+      Buffer.add_string buf "forall";
+      List.iter
+        (fun (_, v) ->
+          Buffer.add_char buf ' ';
+          Buffer.add_string buf v)
+        vars';
+      Buffer.add_string buf ". ";
+      (Buffer.to_bytes buf |> Bytes.to_string) ^ string_of_typ ty'
 
 type ctx = scheme Map.t
 

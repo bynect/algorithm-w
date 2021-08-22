@@ -3,20 +3,23 @@ open Ast
 let ctx : ctx =
   let typs : (string * scheme) list =
     [
-      ("id", Scheme ([ "a" ], Fun (Var "a", Var "a")));
-      ("const", Scheme ([ "a"; "b" ], Fun (Var "a", Fun (Var "b", Var "a"))));
-      ("eq", Scheme ([ "a" ], Fun (Var "a", Fun (Var "a", Bool))));
+      ("id", Scheme ([ "'a" ], Fun (Var "'a", Var "'a")));
+      ("const", Scheme ([ "'a"; "'b" ], Fun (Var "'a", Fun (Var "'b", Var "'a"))));
+      ("eq", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
     ]
   in
   let f acc (v, scheme) = Map.add v scheme acc in
   List.fold_left f Map.empty typs
 
 let infer x = Infer.infer_exp x ctx
+and generalize x = Infer.generalize x ctx
 
 let pipeline exp =
   string_of_exp exp |> print_endline;
+  let typ = infer exp in
   print_string "=> ";
-  infer exp |> string_of_typ |> print_endline
+  (*typ |> string_of_typ |> print_endline*)
+  generalize typ |> string_of_scheme |> print_endline
 
 let () =
   try

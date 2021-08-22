@@ -6,12 +6,15 @@ let rec ftv_typ = function
   | Var v -> Set.singleton v
   | Int | Bool -> Set.empty
   | Fun (p, r) -> Set.union (ftv_typ p) (ftv_typ r)
+  | Tup l ->
+      List.fold_left (fun acc ty -> Set.union (ftv_typ ty) acc) Set.empty l
 
 let rec apply_typ ty s =
   match ty with
   | Var v -> ( match Map.find_opt v s with Some t -> t | None -> ty)
   | Int | Bool -> ty
   | Fun (p, r) -> Fun (apply_typ p s, apply_typ r s)
+  | Tup l -> Tup (List.map (fun ty -> apply_typ ty s) l)
 
 let ftv_scheme = function
   | Scheme (vars, ty) -> Set.diff (ftv_typ ty) (Set.of_list vars)
@@ -58,16 +61,24 @@ let istantiate = function
       List.combine vars vars' |> List.to_seq |> Map.of_seq |> apply_typ ty
 
 let unify ty1 ty2 =
+  let unify_err ty1 ty2 =
+    let ty1' = string_of_typ ty1 and ty2' = string_of_typ ty2 in
+    Printf.sprintf "Unification failed for %s and %s" ty1' ty2' |> failwith
+  in
   let rec unify = function
     | Var v, ty | ty, Var v -> bind_var ty v
     | Int, Int -> Map.empty
     | Bool, Bool -> Map.empty
     | Fun (p, r), Fun (p', r') ->
         let s = unify (p, p') in
-        unify (apply_typ r s, apply_typ r' s) |> compose s
-    | ty1, ty2 ->
-        let ty1' = string_of_typ ty1 and ty2' = string_of_typ ty2 in
-        Printf.sprintf "Unification failed for %s and %s" ty1' ty2' |> failwith
+        unify (apply_typ r s, apply_typ r' s) ++ s
+    | Tup l, Tup l' ->
+        if List.length l != List.length l' then unify_err ty1 ty2
+        else
+          List.fold_left2
+            (fun s ty1 ty2 -> unify (apply_typ ty1 s, apply_typ ty2 s) ++ s)
+            Map.empty l l'
+    | ty1, ty2 -> unify_err ty1 ty2
   in
   unify (ty1, ty2)
 
@@ -104,6 +115,14 @@ let rec infer (exp : exp) ctx =
         ++ unify (apply_typ ty1 s3) (apply_typ ty2 s3)
       in
       (s4 ++ s3 ++ s2 ++ s1, apply_typ ty1 s4)
+  | Tup l ->
+      let tys = List.map (fun exp -> infer exp ctx) l in
+      let s, ty =
+        List.fold_left
+          (fun (acc, acc') (s, ty) -> (acc ++ s, ty :: acc'))
+          (Map.empty, []) tys
+      in
+      (s, apply_typ (Tup ty) s)
   | Lit (Bool _) -> (Map.empty, Bool)
   | Lit (Int _) -> (Map.empty, Int)
 

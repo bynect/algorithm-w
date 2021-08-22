@@ -6,11 +6,13 @@ with the addition of n-tuples.
 ```txt
 exp ::= x                           -- variable
       | exp exp                     -- application
+      | exp `x` exp                 -- infix application
       | fun x -> exp                -- lambda
       | let x = exp in exp          -- let binding
       | if exp then exp else exp    -- if expression
       | i                           -- int literal
       | b                           -- bool literal
+      | exp, exp                    -- tuple
 
 ty  ::= a0...an
       | int

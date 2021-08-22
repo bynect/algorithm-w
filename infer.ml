@@ -40,7 +40,7 @@ let bind_var ty v =
   | Var v' when v = v' -> Map.empty
   | _ ->
       if Set.mem v (ftv_typ ty) then
-        Printf.sprintf "Occurs check failed for %s and %s" v (string_of_typ ty)
+        Printf.sprintf "Occurs check failed for %s in %s" v (string_of_typ ty)
         |> failwith
       else Map.singleton v ty
 

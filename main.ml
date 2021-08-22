@@ -2,7 +2,11 @@ open Ast
 
 let ctx : ctx =
   let typs : (string * scheme) list =
-    [ ("id", Scheme ([ "a" ], Fun (Var "a", Var "a"))) ]
+    [
+      ("id", Scheme ([ "a" ], Fun (Var "a", Var "a")));
+      ("const", Scheme ([ "a"; "b" ], Fun (Var "a", Fun (Var "b", Var "a"))));
+      ("eq", Scheme ([ "a" ], Fun (Var "a", Fun (Var "a", Bool))));
+    ]
   in
   let f acc (v, scheme) = Map.add v scheme acc in
   List.fold_left f Map.empty typs
@@ -19,7 +23,7 @@ let () =
     while true do
       print_string "> ";
       let line = read_line () in
-      if String.equal line ":ctx" then print_endline (string_of_ctx ctx)
+      if String.equal line ":ctx" then string_of_ctx ctx |> print_string
       else
         try
           let lexbuf = Lexing.from_string line in
@@ -30,20 +34,3 @@ let () =
         | Failure msg -> print_endline msg
     done
   with _ -> print_newline ()
-
-(*
-let test () =
-  let exps =
-    [
-      Let ("a", Lit (Int 1), Var "a");
-      If (Lit (Int 1), Lit (Bool true), Lit (Bool true));
-    ]
-  in
-  let print x =
-    string_of_exp x |> print_endline;
-    print_string "=> ";
-    try infer x |> string_of_typ |> print_endline
-    with Failure msg -> print_endline msg
-  in
-  List.iter print exps
-*)

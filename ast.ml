@@ -62,6 +62,7 @@ let string_of_ctx ctx =
   let buf = Buffer.create 50 in
   Map.iter
     (fun v scheme ->
-      v ^ " :: " ^ string_of_scheme scheme |> Buffer.add_string buf)
+      v ^ " :: " ^ string_of_scheme scheme |> Buffer.add_string buf;
+      Buffer.add_char buf '\n')
     ctx;
   Buffer.to_bytes buf |> Bytes.to_string

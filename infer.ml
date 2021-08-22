@@ -50,7 +50,11 @@ let generalize ty ctx =
 
 let istantiate = function
   | Scheme (vars, ty) ->
-      let vars' = vars |> List.map (fun v -> new_var (Char.escaped v.[0])) in
+      let vars' =
+        (*let new_var' v = new_var Char.escaped v.[0] in*)
+        let new_var' _ = new_var "a" in
+        vars |> List.map new_var'
+      in
       List.combine vars vars' |> List.to_seq |> Map.of_seq |> apply_typ ty
 
 let unify ty1 ty2 =

@@ -7,6 +7,7 @@ with the addition of n-tuples.
 exp ::= x                           -- variable
       | exp exp                     -- application
       | exp `x` exp                 -- infix application
+      | exp op exp                  -- infix operation
       | fun x -> exp                -- lambda
       | let x = exp in exp          -- let binding
       | if exp then exp else exp    -- if expression

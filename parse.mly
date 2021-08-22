@@ -43,10 +43,6 @@ exp:
   | e1 = exp; x = op; e2 = exp { fun_apply (Var x) [e1; e2] }
   ;
 
-binary(E1, E2, OP, v):
-  | e1 = E1; OP; e2 = E2 { fun_apply (Var v) [e1; e2] }
-  ;
-
 tuple:
   | e1 = exp; COMMA; e2 = exp { [e2; e1] }
   | t = tuple; COMMA; e = exp { e :: t }

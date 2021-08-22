@@ -31,12 +31,13 @@ let infer exp = Infer.infer_exp exp ctx
 
 and generalize ty = Infer.generalize ty ctx
 
+let print ty = generalize ty |> string_of_scheme |> print_endline
+
 let pipeline exp =
   string_of_exp exp |> print_endline;
   let typ = infer exp in
   print_string "=> ";
-  (*typ |> string_of_typ |> print_endline*)
-  generalize typ |> string_of_scheme |> print_endline
+  print typ
 
 let loop () =
   while true do

@@ -83,13 +83,8 @@ let string_of_scheme = function
       in
       let scheme_var i =
         let off, count = (i mod 26, i / 26) in
-        let buf = Buffer.create 5 in
-        Buffer.add_char buf '\'';
         let chr = Char.code 'a' + off |> Char.chr in
-        for _ = 0 to count do
-          Buffer.add_char buf chr
-        done;
-        Buffer.to_bytes buf |> Bytes.to_string
+        "\'" ^ String.make count chr
       in
       let vars' = List.mapi (fun i v -> (v, scheme_var i)) vars in
       let ty' = List.fold_left rename ty vars' in

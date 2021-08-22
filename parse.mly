@@ -8,12 +8,12 @@ let rec fun_apply exp = function
   | _ -> failwith "Unreachable"
 %}
 
-%token <string> VAR
+%token <string> VAR BVAR
 %token <bool> BOOL
 %token <int> INT
 
 %token FUN IF LET IN THEN ELSE
-%token ARROW LPAREN RPAREN EQ
+%token ARROW LPAREN RPAREN EQ COMMA
 %token EOF
 
 %start <Ast.exp list> main
@@ -26,6 +26,7 @@ main:
 exp:
   | e = sexp { e }
   | e = sexp; es = sexp+ { fun_apply e es }
+  | e = sexp; x = BVAR; es = sexp { fun_apply (Var x) [e; es] }
   | FUN; x = VAR; ARROW; b = exp { Fun (x, b) }
   | LET; x = VAR; EQ; v = exp; IN; b = exp { Let (x, v, b) }
   | IF; c = exp; THEN; t = exp; ELSE; e = exp { If (c, t, e) }

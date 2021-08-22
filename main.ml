@@ -3,6 +3,7 @@ open Ast
 let ctx : ctx =
   let typs : (string * scheme) list =
     [
+      ("and", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
       ("id", Scheme ([ "'a" ], Fun (Var "'a", Var "'a")));
       ( "const",
         Scheme ([ "'a"; "'b" ], Fun (Var "'a", Fun (Var "'b", Var "'a"))) );

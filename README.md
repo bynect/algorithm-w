@@ -1,6 +1,7 @@
 # hm-inference
 
-The type inference is based on the paper [Algorithm W Step by Step](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.65.7733&rep=rep1&type=pdf).
+The implementation is based on the paper [Algorithm W Step by Step][algo-w],
+with the addition of n-tuples.
 
 ```txt
 exp ::= x                           -- variable
@@ -15,4 +16,7 @@ ty  ::= a0...an
       | int
       | bool
       | ty -> ty
+      | ty * ty
 ```
+
+[algo-w]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.65.7733&rep=rep1&type=pdf

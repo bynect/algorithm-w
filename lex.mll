@@ -14,8 +14,15 @@ rule token = parse
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "->" { ARROW }
-  | "=" { EQ }
   | "," { COMMA }
+  | "=" { EQ }
+  | "<>" { NE }
+  | "&&" { AND }
+  | "||" { OR }
+  | "+" { PLUS }
+  | "-" { MINUS }
+  | "*" { STAR }
+  | "/" { SLASH }
   | "fun" { FUN }
   | "if" { IF }
   | "let" { LET }
@@ -25,10 +32,12 @@ rule token = parse
   | "true" { BOOL true }
   | "false" { BOOL false }
   | digit+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | "`" var "`" {
-    let v = Lexing.lexeme lexbuf in
-    BVAR (String.sub v 1 (String.length v - 2))
-  }
+  | "`" var "`"
+    {
+      let v = Lexing.lexeme lexbuf in
+      let len = Lexing.lexeme_end lexbuf - Lexing.lexeme_start lexbuf in
+      BVAR (String.sub v 1 (len - 2))
+    }
   | var { VAR (Lexing.lexeme lexbuf) }
-  | _ { failwith "Lexing error" }
   | eof { EOF }
+  | _ { failwith "Lexing error" }

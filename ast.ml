@@ -84,7 +84,7 @@ let string_of_scheme = function
       let scheme_var i =
         let off, count = (i mod 26, i / 26) in
         let chr = Char.code 'a' + off |> Char.chr in
-        "\'" ^ String.make count chr
+        "\'" ^ String.make (count + 1) chr
       in
       let vars' = List.mapi (fun i v -> (v, scheme_var i)) vars in
       let ty' = List.fold_left rename ty vars' in

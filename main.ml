@@ -3,16 +3,17 @@ open Ast
 let ctx : ctx =
   let typs : (string * scheme) list =
     [
+      ("=", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
+      ("<>", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
+      ("&&", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
+      ("||", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
       ("+", Scheme ([], Fun (Int, Fun (Int, Int))));
       ("-", Scheme ([], Fun (Int, Fun (Int, Int))));
       ("*", Scheme ([], Fun (Int, Fun (Int, Int))));
       ("/", Scheme ([], Fun (Int, Fun (Int, Int))));
-      ("&&", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
-      ("||", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
       ("id", Scheme ([ "'a" ], Fun (Var "'a", Var "'a")));
       ( "const",
         Scheme ([ "'a"; "'b" ], Fun (Var "'a", Fun (Var "'b", Var "'a"))) );
-      ("eq", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
       ( "pair",
         Scheme
           ( [ "'a"; "'b" ],

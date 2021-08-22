@@ -13,11 +13,17 @@ let rec fun_apply exp = function
 %token <int> INT
 
 %token FUN IF LET IN THEN ELSE
-%token ARROW LPAREN RPAREN EQ COMMA
+%token ARROW LPAREN RPAREN COMMA EQ NE
+%token AND OR PLUS MINUS STAR SLASH
 %token EOF
 
-%nonassoc IN ELSE
+%nonassoc LET FUN
+%nonassoc IF
 %left COMMA
+%right AND OR
+%left EQ NE
+%left PLUS MINUS
+%left STAR SLASH
 
 %start <Ast.exp list> main
 %%
@@ -34,6 +40,11 @@ exp:
   | FUN; x = VAR; ARROW; b = exp { Fun (x, b) }
   | LET; x = VAR; EQ; v = exp; IN; b = exp { Let (x, v, b) }
   | IF; c = exp; THEN; t = exp; ELSE; e = exp { If (c, t, e) }
+  | e1 = exp; x = op; e2 = exp { fun_apply (Var x) [e1; e2] }
+  ;
+
+binary(E1, E2, OP, v):
+  | e1 = E1; OP; e2 = E2 { fun_apply (Var v) [e1; e2] }
   ;
 
 tuple:
@@ -43,6 +54,7 @@ tuple:
 
 sexp:
   | x = VAR { Var x }
+  | LPAREN; x = op; RPAREN { Var x }
   | l = lit { Lit l }
   | LPAREN; e = exp; RPAREN { e }
   ;
@@ -50,4 +62,15 @@ sexp:
 lit:
   | b = BOOL { Bool b }
   | i = INT { Int i }
+  ;
+
+op:
+  | EQ { "=" }
+  | NE { "<>" }
+  | AND { "&&" }
+  | OR { "||" }
+  | PLUS { "+" }
+  | MINUS { "-" }
+  | STAR { "*" }
+  | SLASH { "/" }
   ;

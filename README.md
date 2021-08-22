@@ -18,6 +18,7 @@ exp ::= x                           -- variable
 ty  ::= a0...an
       | int
       | bool
+      | unit
       | ty -> ty
       | ty * ty
 ```

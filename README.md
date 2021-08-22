@@ -11,9 +11,10 @@ exp ::= x                           -- variable
       | fun x -> exp                -- lambda
       | let x = exp in exp          -- let binding
       | if exp then exp else exp    -- if expression
+      | exp, exp                    -- tuple
       | i                           -- int literal
       | b                           -- bool literal
-      | exp, exp                    -- tuple
+      | exp :: ty                   -- type annotation
 
 ty  ::= a0...an
       | int

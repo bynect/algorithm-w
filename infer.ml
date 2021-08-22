@@ -4,7 +4,7 @@ type subst = typ Map.t
 
 let rec ftv_typ = function
   | Var v -> Set.singleton v
-  | Int | Bool -> Set.empty
+  | Int | Bool | Unit -> Set.empty
   | Fun (p, r) -> Set.union (ftv_typ p) (ftv_typ r)
   | Tup l ->
       List.fold_left (fun acc ty -> Set.union (ftv_typ ty) acc) Set.empty l
@@ -12,7 +12,7 @@ let rec ftv_typ = function
 let rec apply_typ ty s =
   match ty with
   | Var v -> ( match Map.find_opt v s with Some t -> t | None -> ty)
-  | Int | Bool -> ty
+  | Int | Bool | Unit -> ty
   | Fun (p, r) -> Fun (apply_typ p s, apply_typ r s)
   | Tup l -> Tup (List.map (fun ty -> apply_typ ty s) l)
 
@@ -69,6 +69,7 @@ let unify ty1 ty2 =
     | Var v, ty | ty, Var v -> bind_var ty v
     | Int, Int -> Map.empty
     | Bool, Bool -> Map.empty
+    | Unit, Unit -> Map.empty
     | Fun (p, r), Fun (p', r') ->
         let s = unify (p, p') in
         unify (apply_typ r s, apply_typ r' s) ++ s
@@ -115,6 +116,7 @@ let rec infer (exp : exp) ctx =
         ++ unify (apply_typ ty1 s3) (apply_typ ty2 s3)
       in
       (s4 ++ s3 ++ s2 ++ s1, apply_typ ty1 s4)
+  | Tup [] -> (Map.empty, Unit)
   | Tup l ->
       let tys = List.map (fun exp -> infer exp ctx) l in
       let s, ty =

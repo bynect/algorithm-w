@@ -51,6 +51,7 @@ tuple:
 sexp:
   | x = VAR { Var x }
   | LPAREN; x = op; RPAREN { Var x }
+  | LPAREN; RPAREN { Tup [] }
   | l = lit { Lit l }
   | LPAREN; e = exp; RPAREN { e }
   ;

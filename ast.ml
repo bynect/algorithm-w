@@ -22,6 +22,7 @@ let string_of_exp exp =
     | If (c, t, e) ->
         "If (" ^ str_simple c ^ ") (" ^ str_simple t ^ ") (" ^ str_simple e
         ^ ")"
+    | Tup [] -> "Unit"
     | Tup l ->
         let buf = Buffer.create 50 in
         let append ty = str_simple ty |> Buffer.add_string buf in
@@ -40,7 +41,13 @@ let string_of_exp exp =
   in
   str_simple exp
 
-type typ = Var of string | Int | Bool | Fun of typ * typ | Tup of typ list
+type typ =
+  | Var of string
+  | Int
+  | Bool
+  | Unit
+  | Fun of typ * typ
+  | Tup of typ list
 
 let string_of_typ ty =
   let rec str_simple ty =
@@ -48,6 +55,7 @@ let string_of_typ ty =
     | Var v -> v
     | Int -> "int"
     | Bool -> "bool"
+    | Unit -> "unit"
     | Fun (p, r) -> str_paren p ^ " -> " ^ str_simple r
     | Tup l ->
         let buf = Buffer.create 50 in
@@ -77,7 +85,7 @@ let string_of_scheme = function
       let rec rename ty (v1, v2) =
         match ty with
         | Var v -> Var (if v = v1 then v2 else v)
-        | Bool | Int -> ty
+        | Bool | Int | Unit -> ty
         | Fun (p, r) -> Fun (rename p (v1, v2), rename r (v1, v2))
         | Tup l -> Tup (List.map (fun ty -> rename ty (v1, v2)) l)
       in

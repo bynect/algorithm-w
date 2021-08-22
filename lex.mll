@@ -10,6 +10,7 @@ let var = letter+
 rule token = 
   parse
   | white { token lexbuf }
+  | "--" [^'\n']* { token lexbuf }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "->" { ARROW }

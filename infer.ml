@@ -1,9 +1,5 @@
 open Ast
 
-type scheme = Scheme of string list * typ
-
-type ctx = scheme Map.t
-
 type subst = typ Map.t
 
 let rec ftv_typ = function

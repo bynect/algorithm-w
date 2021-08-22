@@ -28,8 +28,6 @@ let string_of_exp exp =
 
 type typ = Var of string | Int | Bool | Fun of typ * typ
 
-and texp = exp * typ
-
 let string_of_typ ty =
   let rec str_simple ty =
     match ty with
@@ -41,3 +39,29 @@ let string_of_typ ty =
     match ty with Fun (_, _) -> "(" ^ str_simple ty ^ ")" | _ -> str_simple ty
   in
   str_simple ty
+
+type scheme = Scheme of string list * typ
+
+let string_of_scheme = function
+  | Scheme (vars, typ) ->
+      if List.length vars != 0 then (
+        let buf = Buffer.create 50 in
+        Buffer.add_string buf "forall";
+        List.iter
+          (fun v ->
+            Buffer.add_char buf ' ';
+            Buffer.add_string buf v)
+          vars;
+        Buffer.add_string buf ". ";
+        (Buffer.to_bytes buf |> Bytes.to_string) ^ string_of_typ typ)
+      else string_of_typ typ
+
+type ctx = scheme Map.t
+
+let string_of_ctx ctx =
+  let buf = Buffer.create 50 in
+  Map.iter
+    (fun v scheme ->
+      v ^ " :: " ^ string_of_scheme scheme |> Buffer.add_string buf)
+    ctx;
+  Buffer.to_bytes buf |> Bytes.to_string

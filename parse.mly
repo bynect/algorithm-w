@@ -16,11 +16,11 @@ let rec fun_apply exp = function
 %token ARROW LPAREN RPAREN EQ
 %token EOF
 
-%start <Ast.exp> main
+%start <Ast.exp list> main
 %%
 
 main:
-  | e = exp; EOF { e }
+  | e = exp*; EOF { e }
   ;
 
 exp:

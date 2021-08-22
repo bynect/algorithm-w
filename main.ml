@@ -3,25 +3,29 @@ open Ast
 let ctx : ctx =
   let typs : (string * scheme) list =
     [
-      ("=", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
-      ("<>", Scheme ([ "'a" ], Fun (Var "'a", Fun (Var "'a", Bool))));
-      ("&&", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
-      ("||", Scheme ([], Fun (Bool, Fun (Bool, Bool))));
-      ("+", Scheme ([], Fun (Int, Fun (Int, Int))));
-      ("-", Scheme ([], Fun (Int, Fun (Int, Int))));
-      ("*", Scheme ([], Fun (Int, Fun (Int, Int))));
-      ("/", Scheme ([], Fun (Int, Fun (Int, Int))));
-      ("id", Scheme ([ "'a" ], Fun (Var "'a", Var "'a")));
+      ("=", Scheme ([ "'a" ], TFun (TVar "'a", TFun (TVar "'a", TBool))));
+      ("<>", Scheme ([ "'a" ], TFun (TVar "'a", TFun (TVar "'a", TBool))));
+      ("&&", Scheme ([], TFun (TBool, TFun (TBool, TBool))));
+      ("||", Scheme ([], TFun (TBool, TFun (TBool, TBool))));
+      ("+", Scheme ([], TFun (TInt, TFun (TInt, TInt))));
+      ("-", Scheme ([], TFun (TInt, TFun (TInt, TInt))));
+      ("*", Scheme ([], TFun (TInt, TFun (TInt, TInt))));
+      ("/", Scheme ([], TFun (TInt, TFun (TInt, TInt))));
+      ("id", Scheme ([ "'a" ], TFun (TVar "'a", TVar "'a")));
       ( "const",
-        Scheme ([ "'a"; "'b" ], Fun (Var "'a", Fun (Var "'b", Var "'a"))) );
+        Scheme ([ "'a"; "'b" ], TFun (TVar "'a", TFun (TVar "'b", TVar "'a")))
+      );
       ( "pair",
         Scheme
           ( [ "'a"; "'b" ],
-            Fun (Var "'a", Fun (Var "'b", Tup [ Var "'a"; Var "'b" ])) ) );
+            TFun (TVar "'a", TFun (TVar "'b", TTup [ TVar "'a"; TVar "'b" ])) )
+      );
       ( "fst",
-        Scheme ([ "'a"; "'b" ], Fun (Tup [ Var "'a"; Var "'b" ], Var "'a")) );
+        Scheme ([ "'a"; "'b" ], TFun (TTup [ TVar "'a"; TVar "'b" ], TVar "'a"))
+      );
       ( "snd",
-        Scheme ([ "'a"; "'b" ], Fun (Tup [ Var "'a"; Var "'b" ], Var "'b")) );
+        Scheme ([ "'a"; "'b" ], TFun (TTup [ TVar "'a"; TVar "'b" ], TVar "'b"))
+      );
     ]
   in
   let f acc (v, scheme) = Map.add v scheme acc in

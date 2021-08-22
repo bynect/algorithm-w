@@ -1,6 +1,42 @@
 module Set = Set.Make (String)
 module Map = Map.Make (String)
 
+type typ =
+  | TVar of string
+  | TInt
+  | TBool
+  | TUnit
+  | TFun of typ * typ
+  | TTup of typ list
+
+let string_of_typ ty =
+  let rec str_simple ty =
+    match ty with
+    | TVar v -> v
+    | TInt -> "int"
+    | TBool -> "bool"
+    | TUnit -> "unit"
+    | TFun (p, r) -> str_paren p ^ " -> " ^ str_simple r
+    | TTup l ->
+        let buf = Buffer.create 50 in
+        let append ty = str_paren ty |> Buffer.add_string buf in
+        let rec iter = function
+          | [] -> ()
+          | [ ty ] -> append ty
+          | h :: t ->
+              append h;
+              Buffer.add_string buf " * ";
+              iter t
+        in
+        iter l;
+        Buffer.to_bytes buf |> Bytes.to_string
+  and str_paren ty =
+    match ty with
+    | TFun (_, _) | TTup _ -> "(" ^ str_simple ty ^ ")"
+    | _ -> str_simple ty
+  in
+  str_simple ty
+
 type exp =
   | Var of string
   | App of exp * exp
@@ -9,6 +45,7 @@ type exp =
   | If of exp * exp * exp
   | Tup of exp list
   | Lit of lit
+  | Annot of exp * typ
 
 and lit = Bool of bool | Int of int
 
@@ -38,44 +75,9 @@ let string_of_exp exp =
         "Tup (" ^ (Buffer.to_bytes buf |> Bytes.to_string) ^ ")"
     | Lit (Bool b) -> Printf.sprintf "Bool %b" b
     | Lit (Int i) -> Printf.sprintf "Int %d" i
+    | Annot (e, ty) -> "Annot (" ^ str_simple e ^ ") :: " ^ string_of_typ ty
   in
   str_simple exp
-
-type typ =
-  | Var of string
-  | Int
-  | Bool
-  | Unit
-  | Fun of typ * typ
-  | Tup of typ list
-
-let string_of_typ ty =
-  let rec str_simple ty =
-    match ty with
-    | Var v -> v
-    | Int -> "int"
-    | Bool -> "bool"
-    | Unit -> "unit"
-    | Fun (p, r) -> str_paren p ^ " -> " ^ str_simple r
-    | Tup l ->
-        let buf = Buffer.create 50 in
-        let append ty = str_paren ty |> Buffer.add_string buf in
-        let rec iter = function
-          | [] -> ()
-          | [ ty ] -> append ty
-          | h :: t ->
-              append h;
-              Buffer.add_string buf " * ";
-              iter t
-        in
-        iter l;
-        Buffer.to_bytes buf |> Bytes.to_string
-  and str_paren ty =
-    match ty with
-    | Fun (_, _) | Tup _ -> "(" ^ str_simple ty ^ ")"
-    | _ -> str_simple ty
-  in
-  str_simple ty
 
 type scheme = Scheme of string list * typ
 
@@ -84,10 +86,10 @@ let string_of_scheme = function
   | Scheme (vars, ty) ->
       let rec rename ty (v1, v2) =
         match ty with
-        | Var v -> Var (if v = v1 then v2 else v)
-        | Bool | Int | Unit -> ty
-        | Fun (p, r) -> Fun (rename p (v1, v2), rename r (v1, v2))
-        | Tup l -> Tup (List.map (fun ty -> rename ty (v1, v2)) l)
+        | TVar v -> TVar (if v = v1 then v2 else v)
+        | TBool | TInt | TUnit -> ty
+        | TFun (p, r) -> TFun (rename p (v1, v2), rename r (v1, v2))
+        | TTup l -> TTup (List.map (fun ty -> rename ty (v1, v2)) l)
       in
       let scheme_var i =
         let off, count = (i mod 26, i / 26) in

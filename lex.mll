@@ -15,6 +15,8 @@ rule token = parse
   | ")" { RPAREN }
   | "->" { ARROW }
   | "," { COMMA }
+  | "." { DOT }
+  | "::" { COL }
   | "=" { EQ }
   | "<>" { NE }
   | "&&" { AND }
@@ -23,6 +25,7 @@ rule token = parse
   | "-" { MINUS }
   | "*" { STAR }
   | "/" { SLASH }
+  | "forall" { FORALL }
   | "fun" { FUN }
   | "if" { IF }
   | "let" { LET }

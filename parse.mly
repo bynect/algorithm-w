@@ -12,12 +12,12 @@ let rec fun_apply exp = function
 %token <bool> BOOL
 %token <int> INT
 
-%token FUN IF LET IN THEN ELSE
-%token ARROW LPAREN RPAREN COMMA EQ NE
-%token AND OR PLUS MINUS STAR SLASH
+%token ARROW LPAREN RPAREN COMMA DOT COL
+%token EQ NE AND OR PLUS MINUS STAR SLASH
+%token FORALL FUN IF LET IN THEN ELSE
 %token EOF
 
-%nonassoc LET FUN
+%nonassoc LET FUN COL
 %nonassoc IF
 %left COMMA
 %right AND OR
@@ -41,6 +41,7 @@ exp:
   | LET; x = VAR; EQ; v = exp; IN; b = exp { Let (x, v, b) }
   | IF; c = exp; THEN; t = exp; ELSE; e = exp { If (c, t, e) }
   | e1 = exp; x = op; e2 = exp { fun_apply (Var x) [e1; e2] }
+  | e = exp; COL; ty = typ { Annot (e, ty) }
   ;
 
 tuple:
@@ -70,4 +71,27 @@ op:
   | MINUS { "-" }
   | STAR { "*" }
   | SLASH { "/" }
+  ;
+
+typ:
+  | x = VAR
+    {
+      match x with
+      | "int" -> TInt
+      | "bool" -> TBool
+      | "unit" -> TUnit
+      | _ -> Printf.sprintf "Invalid type name %s" x |> failwith
+    }
+  | p = typ; ARROW; r = typ { TFun (p, r) }
+  | t = tuplet { TTup (List.rev t) }
+  ;
+
+tuplet:
+  | ty1 = typ; COMMA; ty2 = typ { [ty1; ty2] }
+  | t = tuplet; COMMA; ty = typ { ty :: t }
+  ;
+
+scheme:
+  | FORALL; xs = VAR+; DOT; ty = typ { Scheme (xs, ty) }
+  | ty = typ { Scheme ([], ty) }
   ;

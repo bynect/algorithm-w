@@ -8,7 +8,7 @@ exp ::= x                           -- variable
       | exp exp                     -- application
       | exp `x` exp                 -- infix application
       | exp op exp                  -- infix operation
-      | fun x -> exp                -- lambda
+      | fun x0...xn -> exp          -- anonymous function
       | let x = exp in exp          -- let binding
       | if exp then exp else exp    -- if expression
       | exp, exp                    -- tuple

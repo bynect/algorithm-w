@@ -55,7 +55,6 @@ let generalize ty ctx =
 let istantiate = function
   | Scheme (vars, ty) ->
       let vars' =
-        (*let new_var' v = new_var Char.escaped v.[0] in*)
         let new_var' _ = new_var "a" in
         vars |> List.map new_var'
       in
@@ -111,10 +110,10 @@ let rec infer (exp : exp) ctx =
       (s, ty')
   | Let (x, v, b) ->
       let s1, ty1 = infer v ctx in
-      let ctx' = Map.remove x ctx in
-      let scheme = apply_ctx ctx' s1 |> generalize ty1 in
-      let ctx' = Map.add x scheme ctx' in
-      let s2, ty2 = infer b (apply_ctx ctx' s1) in
+      let ctx1 = Map.remove x ctx in
+      let scheme = apply_ctx ctx1 s1 |> generalize ty1 in
+      let ctx2 = Map.add x scheme ctx1 in
+      let s2, ty2 = infer b (apply_ctx ctx2 s1) in
       (s2 ++ s1, ty2)
   | If (c, t, e) ->
       let s1, cond = infer c ctx in

@@ -37,7 +37,7 @@ exp:
   | l = tuple { Tup (List.rev l) }
   | e = sexp; es = sexp+ { fun_apply e es }
   | e1 = sexp; x = BVAR; e2 = sexp { fun_apply (Var x) [e1; e2] }
-  | FUN; x = VAR; ARROW; b = exp { Fun (x, b) }
+  | FUN; xs = VAR+; ARROW; b = exp { Fun (xs, b) }
   | LET; x = VAR; EQ; v = exp; IN; b = exp { Let (x, v, b) }
   | IF; c = exp; THEN; t = exp; ELSE; e = exp { If (c, t, e) }
   | e1 = exp; x = op; e2 = exp { fun_apply (Var x) [e1; e2] }
@@ -91,6 +91,7 @@ tuplet:
   | t = tuplet; COMMA; ty = typ { ty :: t }
   ;
 
+// Currently unused
 scheme:
   | FORALL; xs = VAR+; DOT; ty = typ { Scheme (xs, ty) }
   | ty = typ { Scheme ([], ty) }

@@ -40,7 +40,7 @@ let string_of_typ ty =
 type exp =
   | Var of string
   | App of exp * exp
-  | Fun of string * exp
+  | Fun of string list * exp
   | Let of string * exp * exp
   | If of exp * exp * exp
   | Tup of exp list
@@ -53,7 +53,9 @@ let string_of_exp exp =
   let rec str_simple = function
     | Var v -> Printf.sprintf "Var %s" v
     | App (f, a) -> "App (" ^ str_simple f ^ ") (" ^ str_simple a ^ ")"
-    | Fun (x, b) -> "Fun " ^ x ^ " (" ^ str_simple b ^ ")"
+    | Fun (xs, b) ->
+        List.fold_left (fun acc x -> acc ^ " " ^ x) "Fun" xs
+        ^ " (" ^ str_simple b ^ ")"
     | Let (x, v, b) ->
         "Let " ^ x ^ " (" ^ str_simple v ^ ") (" ^ str_simple b ^ ")"
     | If (c, t, e) ->

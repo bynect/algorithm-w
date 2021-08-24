@@ -98,11 +98,17 @@ let rec infer (exp : exp) ctx =
       let r = new_var "a" in
       let s3 = unify (apply_typ ty s2) (TFun (p, r)) in
       (s3 ++ s2 ++ s1, apply_typ r s3)
-  | Fun (x, b) ->
-      let r = new_var "a" in
-      let ctx' = Map.add x (Scheme ([], r)) ctx in
-      let s, p = infer b ctx' in
-      (s, TFun (apply_typ r s, p))
+  | Fun (xs, b) ->
+      let ctx', ps =
+        List.fold_left
+          (fun (acc, acc') x ->
+            let p = new_var "a" in
+            (Map.add x (Scheme ([], p)) acc, p :: acc'))
+          (ctx, []) xs
+      in
+      let s, r = infer b ctx' in
+      let ty' = List.fold_left (fun acc p -> TFun (apply_typ p s, acc)) r ps in
+      (s, ty')
   | Let (x, v, b) ->
       let s1, ty1 = infer v ctx in
       let ctx' = Map.remove x ctx in

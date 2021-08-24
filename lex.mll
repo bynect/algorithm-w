@@ -41,6 +41,7 @@ rule token = parse
       let len = Lexing.lexeme_end lexbuf - Lexing.lexeme_start lexbuf in
       BVAR (String.sub v 1 (len - 2))
     }
+  | "'" var { TVAR (Lexing.lexeme lexbuf) }
   | var { VAR (Lexing.lexeme lexbuf) }
   | eof { EOF }
   | _ { failwith "Lexing error" }

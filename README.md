@@ -1,7 +1,9 @@
 # hm-inference
 
 The implementation is based on the paper [Algorithm W Step by Step][algo-w],
-with the addition of n-tuples.
+with the addition of n-tuples, custom operators, and n-arguments functions.
+
+## Grammar
 
 ```txt
 exp ::= x                           -- variable
@@ -24,4 +26,10 @@ ty  ::= a0...an
       | ty * ty
 ```
 
+## References
+
+* [Algorithm W Step by Step][algo-w]: Original paper
+* [Write you an inference in F#][fsharp]: Various type inference algorithm implemented in F#
+
 [algo-w]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.65.7733&rep=rep1&type=pdf
+[fsharp]: https://github.com/7sharp9/write-you-an-inference-in-fsharp

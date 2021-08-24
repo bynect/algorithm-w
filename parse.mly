@@ -8,7 +8,7 @@ let rec fun_apply exp = function
   | _ -> failwith "Unreachable"
 %}
 
-%token <string> VAR BVAR
+%token <string> VAR BVAR TVAR
 %token <bool> BOOL
 %token <int> INT
 
@@ -82,6 +82,7 @@ typ:
       | "unit" -> TUnit
       | _ -> Printf.sprintf "Invalid type name %s" x |> failwith
     }
+  | x = TVAR { TVar x }
   | p = typ; ARROW; r = typ { TFun (p, r) }
   | t = tuplet { TTup (List.rev t) }
   ;

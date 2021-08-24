@@ -31,8 +31,9 @@ let ftv_ctx ctx =
 
 let apply_ctx (ctx : ctx) s = Map.map (fun scheme -> apply_scheme scheme s) ctx
 
+(* Left biased union *)
 let compose s1 s2 =
-  Map.map (fun t -> apply_typ t s1) s2 |> Map.union (fun _ a _ -> Some a) s1
+  Map.map (fun t -> apply_typ t s1) s2 |> Map.union (fun _ x _ -> Some x) s1
 
 let ( ++ ) = compose
 
@@ -71,13 +72,15 @@ let unify ty1 ty2 =
     | TBool, TBool -> Map.empty
     | TUnit, TUnit -> Map.empty
     | TFun (p, r), TFun (p', r') ->
-        let s = unify (p, p') in
-        unify (apply_typ r s, apply_typ r' s) ++ s
+        let s1 = unify (p, p') in
+        let s2 = unify (apply_typ r s1, apply_typ r' s1) in
+        s2 ++ s1
     | TTup l, TTup l' ->
         if List.length l != List.length l' then unify_err ty1 ty2
         else
           List.fold_left2
-            (fun s ty1 ty2 -> unify (apply_typ ty1 s, apply_typ ty2 s) ++ s)
+            (fun acc ty1 ty2 ->
+              unify (apply_typ ty1 acc, apply_typ ty2 acc) ++ acc)
             Map.empty l l'
     | ty1, ty2 -> unify_err ty1 ty2
   in
@@ -90,16 +93,16 @@ let rec infer (exp : exp) ctx =
       | Some scheme -> (Map.empty, istantiate scheme)
       | None -> Printf.sprintf "Unbound variable %s" v |> failwith)
   | App (f, a) ->
-      let s1, ty1 = infer f ctx in
-      let s2, ty2 = infer a (apply_ctx ctx s1) in
-      let ret = new_var "a" in
-      let s3 = unify (apply_typ ty1 s2) (TFun (ty2, ret)) in
-      (s3 ++ s2 ++ s1, apply_typ ret s3)
+      let s1, ty = infer f ctx in
+      let s2, p = infer a (apply_ctx ctx s1) in
+      let r = new_var "a" in
+      let s3 = unify (apply_typ ty s2) (TFun (p, r)) in
+      (s3 ++ s2 ++ s1, apply_typ r s3)
   | Fun (x, b) ->
-      let ret = new_var "a" in
-      let ctx' = Map.add x (Scheme ([], ret)) ctx in
-      let s, ty = infer b ctx' in
-      (s, TFun (apply_typ ret s, ty))
+      let r = new_var "a" in
+      let ctx' = Map.add x (Scheme ([], r)) ctx in
+      let s, p = infer b ctx' in
+      (s, TFun (apply_typ r s, p))
   | Let (x, v, b) ->
       let s1, ty1 = infer v ctx in
       let ctx' = Map.remove x ctx in
@@ -110,21 +113,20 @@ let rec infer (exp : exp) ctx =
   | If (c, t, e) ->
       let s1, cond = infer c ctx in
       let s2, ty1 = infer t (apply_ctx ctx s1) in
-      let s3, ty2 = infer e (apply_ctx ctx s2) in
-      let s4 =
-        unify (apply_typ cond s1) TBool
-        ++ unify (apply_typ ty1 s3) (apply_typ ty2 s3)
-      in
-      (s4 ++ s3 ++ s2 ++ s1, apply_typ ty1 s4)
+      let s3, ty2 = infer e (apply_ctx ctx s1) in
+      let s4 = unify (apply_typ cond s1) TBool in
+      let s5 = unify (apply_typ ty1 s3) (apply_typ ty2 s3) in
+      (s5 ++ s4 ++ s3 ++ s2 ++ s1, apply_typ ty1 s4)
   | Tup [] -> (Map.empty, TUnit)
   | Tup l ->
-      let tys = List.map (fun exp -> infer exp ctx) l in
-      let s, ty =
+      let s, tys =
         List.fold_left
-          (fun (acc, acc') (s, ty) -> (acc ++ s, ty :: acc'))
-          (Map.empty, []) tys
+          (fun (acc, tys) exp ->
+            let s, ty = apply_ctx ctx acc |> infer exp in
+            (s ++ acc, ty :: tys))
+          (Map.empty, []) l
       in
-      (s, apply_typ (TTup ty) s)
+      (s, apply_typ (TTup tys) s)
   | Lit (Bool _) -> (Map.empty, TBool)
   | Lit (Int _) -> (Map.empty, TInt)
   | Annot (e, ty) ->

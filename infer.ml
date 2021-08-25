@@ -54,10 +54,7 @@ let generalize ty ctx =
 
 let istantiate = function
   | Scheme (vars, ty) ->
-      let vars' =
-        let new_var' _ = new_var "a" in
-        vars |> List.map new_var'
-      in
+      let vars' = vars |> List.map (fun _ -> new_var "a") in
       List.combine vars vars' |> List.to_seq |> Map.of_seq |> apply_typ ty
 
 let unify ty1 ty2 =
@@ -65,25 +62,25 @@ let unify ty1 ty2 =
     let ty1' = string_of_typ ty1 and ty2' = string_of_typ ty2 in
     Printf.sprintf "Unification failed for %s and %s" ty1' ty2' |> failwith
   in
-  let rec unify = function
+  let rec unify' = function
     | TVar v, ty | ty, TVar v -> bind_var ty v
     | TInt, TInt -> Map.empty
     | TBool, TBool -> Map.empty
     | TUnit, TUnit -> Map.empty
     | TFun (p, r), TFun (p', r') ->
-        let s1 = unify (p, p') in
-        let s2 = unify (apply_typ r s1, apply_typ r' s1) in
+        let s1 = unify' (p, p') in
+        let s2 = unify' (apply_typ r s1, apply_typ r' s1) in
         s2 ++ s1
     | TTup l, TTup l' ->
         if List.length l != List.length l' then unify_err ty1 ty2
         else
           List.fold_left2
             (fun acc ty1 ty2 ->
-              unify (apply_typ ty1 acc, apply_typ ty2 acc) ++ acc)
+              unify' (apply_typ ty1 acc, apply_typ ty2 acc) ++ acc)
             Map.empty l l'
     | ty1, ty2 -> unify_err ty1 ty2
   in
-  unify (ty1, ty2)
+  unify' (ty1, ty2)
 
 let rec infer (exp : exp) ctx =
   match exp with

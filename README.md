@@ -1,7 +1,7 @@
 # Algorithm W implementation
 
 The implementation is based on the paper [Algorithm W Step by Step][algo-w],
-with the addition of n-tuples, custom operators, and n-arguments functions.
+with the addition of n-tuples, custom operators and if expressions.
 
 ## Grammar
 
